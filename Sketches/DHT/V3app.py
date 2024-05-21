@@ -30,26 +30,22 @@ start_time = time.time()
 def read_serial() -> bool:
     """Read in information from arduino via the serial connection. 
     Append to the internal data storage if data available."""
-    try:
-        if ser.in_waiting > 0:  # Check if there is data in the buffer
-            line = ser.readline().decode('utf-8').strip()
-            current_time = round(time.time() - start_time)
-            if line:
-                if line.startswith("T"):
-                    temp_value = float(line[2:])
-                    data["Time"].append(current_time)
-                    data["Temperature"].append(temp_value)
-                    data["Humidity"].append(np.nan)  # Placeholder for humidity
-                elif line.startswith("H"):
-                    hum_value = float(line[2:])
-                    data["Time"].append(current_time)
-                    data["Temperature"].append(np.nan)  # Placeholder for temp
-                    data["Humidity"].append(hum_value)
-                return True
-    except serial.SerialException as e:
-        st.error(f"Serial error: {e}")
-        ser.close()
-    return False
+
+    if ser.in_waiting > 0:  # Check if there is data in the buffer
+        line = ser.readline().decode('utf-8').strip()
+        current_time = round(time.time() - start_time)
+        if line:
+            if line.startswith("T"):
+                temp_value = float(line[2:])
+                data["Time"].append(current_time)
+                data["Temperature"].append(temp_value)
+                data["Humidity"].append(np.nan)  # Placeholder for humidity
+            elif line.startswith("H"):
+                hum_value = float(line[2:])
+                data["Time"].append(current_time)
+                data["Temperature"].append(np.nan)  # Placeholder for temp
+                data["Humidity"].append(hum_value)
+    return data
 
 
 # Placeholder for the dataframe and charts
@@ -60,8 +56,13 @@ with col2:
     chart_placeholder = st.empty()
 
 
-def update_display():
+def update_display(data):
     """Update the streamlit elements upon new data read in."""
+    # read last row of each metric
+    time_last = data["Time"]
+    temp_last = data["Temperature"]
+    hum_last = data["Humidity"]
+
     df = pd.DataFrame(data)
 
     # Forward fill to align NaN values properly
@@ -75,12 +76,16 @@ def update_display():
     chart_placeholder.line_chart(df.set_index(
         "Time"))
 
+    st.write(time_last)
+    st.write(temp_last)
+    st.write(hum_last)
+
 
 try:
     while True:
         if read_serial():
-            update_display()
-        # time.sleep(1)  # Sleep for a second before updating
+            update_display(data)
+
 except KeyboardInterrupt:
     st.stop()
 finally:
