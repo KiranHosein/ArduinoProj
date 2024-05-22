@@ -4,7 +4,8 @@ import threading
 import time
 
 import pandas as pd
-import streamlit as st
+import matplotlib.pyplot as plt
+import matplotlib.animation as animation
 
 
 class SafeList:
@@ -57,28 +58,43 @@ def readserial(comport: str, baudrate: int, data_store: SafeList, n_last: int):
         time.sleep(0.1)  # Adjust as needed to control read frequency
 
 
-def update_display(data):
-    """Update the streamlit elements upon new data read in."""
-    df = pd.DataFrame(data)
-    return df
+def update_plot(i, data_store, line, ax):
+    """Update the plot with new data."""
+    data = data_store.get_list()
+    if data:
+        df = pd.DataFrame(data)
+        ax.clear()
+        ax.plot(df['Time'], df['T'], label='Temperature')
+        ax.plot(df['Time'], df['H'], label='Humidity')
+        ax.legend(loc='upper right')
+        ax.set_xlabel('Time (s)')
+        ax.set_ylabel('Value')
+        ax.set_title('Real-Time Temperature and Humidity')
 
 
-def process_data(data_store: SafeList):
-    """Example function to read and process data from the SafeList.
-    And show that the dynamic list can be accessed."""
-    while True:
+def main():
+    port = 'COM3'
+    baud_rate = 9600
+    n_last = 10  # Keep the last 10 items in the list
 
-        current_data = data_store.get_list()
-        # generate a new dataframe based on new serial inputs
-        df_update = update_display(current_data)
-        print(df_update)
+    safe_list = SafeList()
 
-        # # Update the dataframe on streamlit
-        # df_input.dataframe(df_update)
-        # # Update the line chart
-        # chart_input.line_chart(df_input.set_index(
-        #     "Time"))
+    # Start the serial reading thread
+    serial_thread = threading.Thread(
+        target=readserial, args=(port, baud_rate, safe_list, n_last))
+    serial_thread.daemon = True
+    serial_thread.start()
 
-        # st.write(df_update)
+    # Set up the plot
+    fig, ax = plt.subplots()
+    line, = ax.plot([], [], 'r-')
 
-        time.sleep(1)  # Simulate processing delay
+    # Use FuncAnimation to update the plot
+    ani = animation.FuncAnimation(
+        fig, update_plot, fargs=(safe_list, line, ax), interval=1000)
+
+    plt.show()
+
+
+if __name__ == "__main__":
+    main()
