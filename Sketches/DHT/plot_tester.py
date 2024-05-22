@@ -15,7 +15,7 @@ serial_thread = threading.Thread(
 serial_thread.daemon = True
 serial_thread.start()
 
-# Start the data processing thread
+# Start the data processing thread - currently supplementary
 processing_thread = threading.Thread(
     target=serial_handler_plot.process_data_plot, args=(safe_list,))
 processing_thread.daemon = True
