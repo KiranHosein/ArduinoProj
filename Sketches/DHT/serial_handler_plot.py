@@ -4,7 +4,7 @@ import threading
 import time
 
 import pandas as pd
-import streamlit as st
+import matplotlib.pyplot as plt
 
 
 class SafeList:
@@ -75,24 +75,24 @@ def process_data(data_store: SafeList):
         time.sleep(1)  # Simulate processing delay
 
 
-def process_data_streamlit(data_store: SafeList, df_input):
+def process_data_plot(data_store: SafeList):
     """Example function to read and process data from the SafeList.
     And show that the dynamic list can be accessed in a different thread."""
-    #while True:
+    while True:
+        df_update = update_dataframe(data_store)
+        #plot updated dataframe as a linegraph 
+        print(df_update)
 
-        #current_data = data_store.get_list()
+        # if not df_update.empty:
+        #     plt.plot(df_update["Time"], df_update["T"], marker='o', color='b', linestyle='-')
+        #     # Adding title and labels
+        #     plt.title('Temp over Time')
+        #     plt.xlabel('Time')
+        #     plt.ylabel('Temp')
 
-    # generate a new dataframe based on new serial inputs
-    df_update = update_dataframe(data_store)
-    print(df_update)
+        #     # Display the plot
+        #     plt.draw()
+        time.sleep(1)  # Simulate processing delay
 
-    #Update the dataframe on streamlit
-    df_input.dataframe(df_update)
-    # # Update the line chart
-    # chart_input.line_chart(df_input.set_index(
-    #     "Time"))
 
-    # st.write(df_update)
-
-    time.sleep(1)  # Simulate processing delay
 

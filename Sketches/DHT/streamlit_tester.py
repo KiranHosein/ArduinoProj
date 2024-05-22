@@ -1,12 +1,14 @@
-import serial_handler
+import Sketches.DHT.serial_handler_plot as serial_handler_plot
 import time
 import threading
 
 import streamlit as st
 import pandas as pd
+#import queue
 
+#data_queue = queue.Queue()
 
-safe_list = serial_handler.SafeList()
+safe_list = serial_handler_plot.SafeList()
 port = 'COM3'
 baud_rate = 9600
 n_last = 5
@@ -26,13 +28,13 @@ with col2:
 
 # Start the serial reading thread
 serial_thread = threading.Thread(
-    target=serial_handler.readserial, args=(port, baud_rate, safe_list, n_last))
+    target=serial_handler_plot.readserial, args=(port, baud_rate, safe_list, n_last))
 serial_thread.daemon = True
 serial_thread.start()
 
 # Start the data processing thread
 processing_thread = threading.Thread(
-    target=serial_handler.process_data, args=(safe_list, df_placeholder, chart_placeholder))
+    target=serial_handler_plot.process_data_streamlit, args=(safe_list, df_placeholder))
 processing_thread.daemon = True
 processing_thread.start()
 
@@ -42,3 +44,8 @@ try:
         time.sleep(0.1)  # Keep the main thread running
 except KeyboardInterrupt:
     print("Stopping threads.")
+
+
+# Ensure threads are joined before exiting
+serial_thread.join()
+processing_thread.join()
