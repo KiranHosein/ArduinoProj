@@ -1,14 +1,13 @@
-import time
 import threading
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
-import serial_handler_plot  # Assuming you have this module
+from handlers import serial_handler_plot
 
 # Initialize the SafeList and other parameters
 safe_list = serial_handler_plot.SafeList()
 port = 'COM3'
 baud_rate = 9600
-n_last = 5
+n_last = 10 #get last 10 items i.e. last 10 seconds of data
 
 # Start the serial reading thread
 serial_thread = threading.Thread(

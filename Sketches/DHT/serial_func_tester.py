@@ -1,4 +1,4 @@
-import serial_handler
+from handlers import serial_handler
 import time
 import threading
 

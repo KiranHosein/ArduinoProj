@@ -1,12 +1,8 @@
-import Sketches.DHT.serial_handler_plot as serial_handler_plot
+from handlers import serial_handler_plot
 import time
 import threading
 
 import streamlit as st
-import pandas as pd
-#import queue
-
-#data_queue = queue.Queue()
 
 safe_list = serial_handler_plot.SafeList()
 port = 'COM3'

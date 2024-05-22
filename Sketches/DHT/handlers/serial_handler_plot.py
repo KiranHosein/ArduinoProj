@@ -4,8 +4,6 @@ import threading
 import time
 
 import pandas as pd
-import matplotlib.pyplot as plt
-
 
 class SafeList:
     """Class for a persistent dynamic list that 
