@@ -45,20 +45,20 @@ def readserial(comport: str, baudrate: int, data_store: SafeList, n_last: int):
         data = ser.readline().decode().strip()
         if data and data[0] == "{" and data[-1] == "}":
             try:
-                r_dict = ast.literal_eval(data)
+                r_dict = ast.literal_eval(data) #convert a str representation of a dict to dict
                 current_time = round(time.time() - start_time)
-                r_dict["Time"] = current_time
+                r_dict["Time"] = current_time #add a time for each dict entry
                 data_store.add_item(r_dict)
-                if len(data_store.get_list()) > n_last:
-                    # Keep only the last n items
+                # Keep only the last n items of the dict
+                if len(data_store.get_list()) > n_last:                 
                     data_store.set_list(data_store.get_last_n_items(n_last))
             except (ValueError, SyntaxError) as e:
                 print(f"Error parsing data: {data} - {e}")
-        time.sleep(0.1)  # Adjust as needed to control read frequency
+        time.sleep(0.1)  # Adjust to control read frequency
 
 
-def update_display(data):
-    """Update the streamlit elements upon new data read in."""
+def update_dataframe(data:list) -> pd.DataFrame:
+    """Create a dataframe based on the data input."""
     df = pd.DataFrame(data)
     return df
 
@@ -69,11 +69,12 @@ def process_data(data_store: SafeList):
     while True:
 
         current_data = data_store.get_list()
+
         # generate a new dataframe based on new serial inputs
-        df_update = update_display(current_data)
+        df_update = update_dataframe(current_data)
         print(df_update)
 
-        # # Update the dataframe on streamlit
+        # Update the dataframe on streamlit
         # df_input.dataframe(df_update)
         # # Update the line chart
         # chart_input.line_chart(df_input.set_index(

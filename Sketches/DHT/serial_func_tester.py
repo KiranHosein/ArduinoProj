@@ -1,12 +1,14 @@
-import Sketches.DHT.serial_handler as serial_handler
+import serial_handler
 import time
 import threading
 
-
-safe_list = serial_handler.SafeList()
+#Define variables for connection
 port = 'COM3'
 baud_rate = 9600
-n_last = 5
+
+#Define variables for storage and readout
+safe_list = serial_handler.SafeList()
+n_last = 10
 
 # Start the serial reading thread
 serial_thread = threading.Thread(
