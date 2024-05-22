@@ -2,12 +2,13 @@ import threading
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 from handlers import serial_handler_plot
+import numpy as np
 
 # Initialize the SafeList and other parameters
 safe_list = serial_handler_plot.SafeList()
 port = 'COM3'
 baud_rate = 9600
-n_last = 10 #get last 10 items i.e. last 10 seconds of data
+n_last = 30 #get last 10 items i.e. last 10 seconds of data
 
 # Start the serial reading thread
 serial_thread = threading.Thread(
@@ -25,6 +26,11 @@ processing_thread.start()
 # Create a plot
 fig = plt.figure(figsize=(6,4))
 axes = fig.add_subplot(1,1,1)
+# major_ticks = np.arange(-10, 121, 20)
+# minor_ticks = np.arange(-10, 121, 10)
+# axes.set_yticks(major_ticks)
+# axes.set_yticks(minor_ticks, minor=True)
+
 plt.title("Arduino sensors over time.")
 
 def animate(i): #i is the current frame
@@ -35,8 +41,8 @@ def animate(i): #i is the current frame
         y_data_2 = [entry['T'] for entry in safe_list.get_list()]
         
         plt.xlim(i-n_last,i+1)
-        axes.set_ylim(0,100)
-        line1, = axes.plot(x_data,y_data_1, scaley=True, scalex=True, color="blue")
+        axes.set_ylim(-20,100)
+        line1, = axes.plot(x_data,y_data_1, scaley=True, scalex=True, color="blue", linestyle = "dotted")
         line1.set_label('Humidity (%)')
         line2, = axes.plot(x_data,y_data_2, scaley=True, scalex=True, color="red")
         line2.set_label('Temp (C)')
@@ -47,4 +53,5 @@ anim = animation.FuncAnimation(fig, animate, interval=1000)
 
 plt.xlabel('Time (s)')
 plt.ylabel('Sensors')
+plt.grid()
 plt.show()
