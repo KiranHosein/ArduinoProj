@@ -7,9 +7,9 @@ import json
 
 
 # Load the model
-model = keras.saving.load_model(r'ArduinoProj/Anomaly_Detection/trained_model.keras')
+model = keras.saving.load_model(r'./Anomaly_Detection/trained_model.keras')
 # Load mean, std, and threshold values from a JSON file
-with open(r'ArduinoProj/Anomaly_Detection/scaling_thresholds.json', 'r') as f:
+with open(r'./Anomaly_Detection/scaling_thresholds.json', 'r') as f:
     data = json.load(f)
 
 t_mean_train = data['t_mean_train']

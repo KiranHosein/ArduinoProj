@@ -9,13 +9,13 @@ custom_objects = {
 }
 
 # data read in
-df_th = pd.read_csv(r'ArduinoProj/time_series.csv')
+df_th = pd.read_csv(r'Data/time_series.csv')
 df_th.head()
 df_th.drop(columns=["Unnamed: 0"], inplace=True)
 
 
 # anomaly read in
-df_tha = pd.read_csv(r'ArduinoProj/anom_time_series_try2.csv')
+df_tha = pd.read_csv(r'Data/anom_time_series_try2.csv')
 df_tha.head()
 df_tha.drop(columns=["Unnamed: 0"], inplace=True)
 
