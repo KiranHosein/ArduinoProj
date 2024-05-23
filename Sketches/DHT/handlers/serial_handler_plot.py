@@ -73,24 +73,29 @@ def process_data(data_store: SafeList):
         time.sleep(1)  # Simulate processing delay
 
 
-def process_data_plot(data_store: SafeList):
-    """Example function to read and process data from the SafeList.
-    And show that the dynamic list can be accessed in a different thread."""
+def collect_data(data_store: SafeList):
+    """Data collection function to save 
+    timeseries data after a set number of entries."""
+    counter = 0
+    checkpoint = 500
     while True:
-        df_update = update_dataframe(data_store)
-        #plot updated dataframe as a linegraph 
-        print(df_update)
-
-        # if not df_update.empty:
-        #     plt.plot(df_update["Time"], df_update["T"], marker='o', color='b', linestyle='-')
-        #     # Adding title and labels
-        #     plt.title('Temp over Time')
-        #     plt.xlabel('Time')
-        #     plt.ylabel('Temp')
-
-        #     # Display the plot
-        #     plt.draw()
-        time.sleep(1)  # Simulate processing delay
+        if data_store and len(data_store.get_list())>=1:
+            print(data_store.get_list())
+            if len(data_store.get_list()) == 5000:
+                df_update = update_dataframe(data_store)
+                #print(data_store.get_list())
+                print(df_update)
+                df_update.to_csv("time_series.csv")
+            elif len(data_store.get_list()) % checkpoint == 0:
+                #print(print(data_store.get_list()))
+                checkpoint_data = data_store.get_last_n_items(n=checkpoint)
+                df_c = pd.DataFrame(checkpoint_data)
+                df_c.to_csv(f"time_series_checkpoint_{counter}.csv")
+                counter = counter + checkpoint
+                print(checkpoint_data)
+                print(df_c)
+                print(counter)
+            time.sleep(1)  # Simulate processing delay
 
 
 

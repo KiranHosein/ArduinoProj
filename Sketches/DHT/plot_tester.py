@@ -8,7 +8,7 @@ import numpy as np
 safe_list = serial_handler_plot.SafeList()
 port = 'COM3'
 baud_rate = 9600
-n_last = 30 #get last 10 items i.e. last 10 seconds of data
+n_last = 5500 #get last 10 items i.e. last 10 seconds of data
 
 # Start the serial reading thread
 serial_thread = threading.Thread(
@@ -18,7 +18,7 @@ serial_thread.start()
 
 # Start the data processing thread - currently supplementary
 processing_thread = threading.Thread(
-    target=serial_handler_plot.process_data_plot, args=(safe_list,))
+    target=serial_handler_plot.collect_data, args=(safe_list,))
 processing_thread.daemon = True
 processing_thread.start()
 
@@ -40,7 +40,7 @@ def animate(i): #i is the current frame
         y_data_1 = [entry['H'] for entry in safe_list.get_list()]
         y_data_2 = [entry['T'] for entry in safe_list.get_list()]
         
-        plt.xlim(i-n_last,i+1)
+        plt.xlim(i-30, i+1)
         axes.set_ylim(-20,100)
         line1, = axes.plot(x_data,y_data_1, scaley=True, scalex=True, color="blue", linestyle = "dotted")
         line1.set_label('Humidity (%)')
