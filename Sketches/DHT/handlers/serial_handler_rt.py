@@ -2,9 +2,8 @@ import serial
 import ast
 import threading
 import time
-import os
 import pandas as pd
-import signal
+import numpy as np
 
 class SafeList:
     """Class for a persistent dynamic list that 
@@ -74,33 +73,42 @@ def process_data(data_store: SafeList):
         time.sleep(1)  # Simulate processing delay
 
 
-def collect_data(data_store: SafeList):
-    """Data collection function to save 
-    timeseries data after a set number of entries."""
-    counter = 0
-    checkpoint = 100
+# Define functions for preprocessing, sequence creation, and streaming prediction
+def preprocess_data(data_store: SafeList, t_mean_train, t_std_train, h_mean_train, h_std_train):
+    if data_store and len(data_store.get_list()) > 2:
+        df = update_dataframe(data_store)
+        df["T_standardscaled"] = (df["T"] - t_mean_train) / t_std_train 
+        df["H_standardscaled"] = (df["H"] - h_mean_train) / h_std_train 
+        print(df)
+        return df
+    return None
+
+def create_sequences(values, time_steps=60):
+    output = []
+    for i in range(len(values) - time_steps + 1):
+        output.append(values[i : (i + time_steps)])
+    return np.stack(output) if output else np.empty((0, time_steps, values.shape[1]))
+
+
+def predict_on_streaming_data(model, data_store, t_mean_train, t_std_train, h_mean_train, h_std_train, threshold):
     while True:
-        if data_store and len(data_store.get_list())>=1:
-            #print(data_store.get_list())
-            if len(data_store.get_list()) == 1000:
-                df_update = update_dataframe(data_store)
-                #print(data_store.get_list())
-                print(df_update)
-                df_update.to_csv("time_series_home.csv")
-            # elif len(data_store.get_list()) % checkpoint == 0:
-            #     #print(print(data_store.get_list()))
-            #     checkpoint_data = data_store.get_last_n_items(n=checkpoint)
-            #     df_c = pd.DataFrame(checkpoint_data)
-            #     df_c.to_csv(f"anom_time_series_checkpoint_{counter}.csv")
-            #     counter = counter + checkpoint
-            #     #print(checkpoint_data)
-            #     print(df_c)
-            #     print(counter)
-            elif len(data_store.get_list()) % 100 == 0:
-                print(print(data_store.get_list()))
-            elif len(data_store.get_list()) > 5000:
-                os.kill(os.getpid(), signal.SIGINT)
-            time.sleep(1)  # Simulate processing delay
+        preprocessed_data = preprocess_data(data_store, t_mean_train, t_std_train, h_mean_train, h_std_train)
+        if preprocessed_data is not None:
+            sequences = create_sequences(preprocessed_data[["H_standardscaled"]].values)
+            print(sequences)
+            if sequences.size > 0:
+                predictions = model.predict(sequences)
+                mae_loss = np.mean(np.abs(predictions - sequences), axis=1)
+                mae_loss = mae_loss.reshape((-1))
+                anomalies = mae_loss > threshold
+                if any(anomalies):
+                    print("Anomaly detected!")
+                    print("Indices of anomaly samples: ", np.where(anomalies))
+                else:
+                    print("No anomaly detected.")
+        time.sleep(1)  # Simulate processing delay
+
+
 
 
 

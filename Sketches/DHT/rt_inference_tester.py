@@ -1,24 +1,38 @@
 import threading
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
-from handlers import serial_handler_plot
-import numpy as np
+from handlers import serial_handler_rt
+import keras
+import json
+
+
+# Load the model
+model = keras.saving.load_model(r'ArduinoProj/Anomaly_Detection/trained_model.keras')
+# Load mean, std, and threshold values from a JSON file
+with open(r'ArduinoProj/Anomaly_Detection/scaling_thresholds.json', 'r') as f:
+    data = json.load(f)
+
+t_mean_train = data['t_mean_train']
+t_std_train = data['t_std_train']
+h_mean_train = data['h_mean_train']
+h_std_train = data['h_std_train']
+threshold = data['threshold']
 
 # Initialize the SafeList and other parameters
-safe_list = serial_handler_plot.SafeList()
+safe_list = serial_handler_rt.SafeList()
 port = 'COM3'
 baud_rate = 9600
-n_last = 5000 #get last 10 items i.e. last 10 seconds of data
+n_last = 120 #get last 10 items i.e. last 10 seconds of data
 
 # Start the serial reading thread
 serial_thread = threading.Thread(
-    target=serial_handler_plot.readserial, args=(port, baud_rate, safe_list, n_last))
+    target=serial_handler_rt.readserial, args=(port, baud_rate, safe_list, n_last))
 serial_thread.daemon = True
 serial_thread.start()
 
 # Start the data collecting thread 
 processing_thread = threading.Thread(
-    target=serial_handler_plot.collect_data, args=(safe_list,))
+    target=serial_handler_rt.predict_on_streaming_data, args=(model, safe_list, t_mean_train, t_std_train, h_mean_train, h_std_train, threshold))
 processing_thread.daemon = True
 processing_thread.start()
 
@@ -49,7 +63,7 @@ def animate(i): #i is the current frame
         axes.legend(handles=[line1, line2])
 
 
-anim = animation.FuncAnimation(fig, animate, interval=1000)
+anim = animation.FuncAnimation(fig, animate, interval=1000,cache_frame_data=False)
 
 plt.xlabel('Time (s)')
 plt.ylabel('Sensors')
