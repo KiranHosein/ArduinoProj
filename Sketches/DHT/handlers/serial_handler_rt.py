@@ -83,7 +83,7 @@ def preprocess_data(data_store: SafeList, t_mean_train, t_std_train, h_mean_trai
         return df
     return None
 
-def create_sequences(values, time_steps=60):
+def create_sequences(values, time_steps=10):
     output = []
     for i in range(len(values) - time_steps + 1):
         output.append(values[i : (i + time_steps)])
@@ -95,17 +95,19 @@ def predict_on_streaming_data(model, data_store, t_mean_train, t_std_train, h_me
         preprocessed_data = preprocess_data(data_store, t_mean_train, t_std_train, h_mean_train, h_std_train)
         if preprocessed_data is not None:
             sequences = create_sequences(preprocessed_data[["H_standardscaled"]].values)
-            print(sequences)
-            if sequences.size > 0:
-                predictions = model.predict(sequences)
-                mae_loss = np.mean(np.abs(predictions - sequences), axis=1)
-                mae_loss = mae_loss.reshape((-1))
-                anomalies = mae_loss > threshold
-                if any(anomalies):
-                    print("Anomaly detected!")
-                    print("Indices of anomaly samples: ", np.where(anomalies))
-                else:
-                    print("No anomaly detected.")
+            if sequences is not None and sequences.size > 0:
+                print(sequences[-1])
+                if sequences.size > 0:
+                    predictions = model.predict(sequences[-1])
+                    print(predictions)
+                    mae_loss = np.mean(np.abs(predictions[:, 1, -1].reshape(10, 1) - sequences[-1]), axis=1)
+                    mae_loss = mae_loss.reshape((-1))
+                    anomalies = mae_loss > threshold
+                    if any(anomalies):
+                        print("Anomaly detected!")
+                        print("Indices of anomaly samples: ", np.where(anomalies))
+                    else:
+                        print("No anomaly detected.")
         time.sleep(1)  # Simulate processing delay
 
 

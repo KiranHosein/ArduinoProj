@@ -87,15 +87,15 @@ def collect_data(data_store: SafeList):
                 #print(data_store.get_list())
                 print(df_update)
                 df_update.to_csv("time_series_home.csv")
-            # elif len(data_store.get_list()) % checkpoint == 0:
-            #     #print(print(data_store.get_list()))
-            #     checkpoint_data = data_store.get_last_n_items(n=checkpoint)
-            #     df_c = pd.DataFrame(checkpoint_data)
-            #     df_c.to_csv(f"anom_time_series_checkpoint_{counter}.csv")
-            #     counter = counter + checkpoint
-            #     #print(checkpoint_data)
-            #     print(df_c)
-            #     print(counter)
+            elif len(data_store.get_list()) % checkpoint == 0:
+                #print(print(data_store.get_list()))
+                checkpoint_data = data_store.get_last_n_items(n=checkpoint)
+                df_c = pd.DataFrame(checkpoint_data)
+                df_c.to_csv(f"anom_time_series_checkpoint_{counter}.csv")
+                counter = counter + checkpoint
+                #print(checkpoint_data)
+                print(df_c)
+                print(counter)
             elif len(data_store.get_list()) % 100 == 0:
                 print(print(data_store.get_list()))
             elif len(data_store.get_list()) > 5000:

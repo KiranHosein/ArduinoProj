@@ -8,7 +8,7 @@ import numpy as np
 safe_list = serial_handler_plot.SafeList()
 port = 'COM3'
 baud_rate = 9600
-n_last = 5000 #get last 10 items i.e. last 10 seconds of data
+n_last = 30 #get last 10 items i.e. last 10 seconds of data
 
 # Start the serial reading thread
 serial_thread = threading.Thread(
@@ -18,7 +18,7 @@ serial_thread.start()
 
 # Start the data collecting thread 
 processing_thread = threading.Thread(
-    target=serial_handler_plot.collect_data, args=(safe_list,))
+    target=serial_handler_plot.process_data, args=(safe_list,))
 processing_thread.daemon = True
 processing_thread.start()
 
